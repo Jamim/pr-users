@@ -2,7 +2,7 @@ from rest_framework import generics, permissions
 
 from django.contrib.auth import get_user_model
 
-from .permissions import IsNotCurrentUser
+from .permissions import IsNotCurrentUser, IsNotAuthenticated
 from .serializers import UserSerializer
 
 
@@ -22,3 +22,8 @@ class UserList(UserViewMixin, generics.ListCreateAPIView):
 
 class UserView(UserViewMixin, generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.IsAuthenticated, IsNotCurrentUser)
+
+
+class SignUpView(generics.CreateAPIView):
+    permission_classes = (IsNotAuthenticated,)
+    serializer_class = UserSerializer
