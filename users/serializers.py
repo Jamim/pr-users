@@ -12,7 +12,16 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'username', 'first_name', 'last_name', 'email', 'password'
         )
-        extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = dict(
+            password=dict(write_only=True, required=False),
+            first_name=dict(required=True, allow_blank=False),
+            last_name=dict(required=True, allow_blank=False),
+            email=dict(required=True, allow_blank=False),
+        )
+
+
+class NewUserSerializer(UserSerializer):
+    password = serializers.CharField(max_length=128, write_only=True)
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -20,3 +29,8 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+class CredentialsSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150, write_only=True)
+    password = serializers.CharField(max_length=128, write_only=True)
