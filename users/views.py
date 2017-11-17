@@ -6,10 +6,21 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model, authenticate, login, logout
 
 from .permissions import IsNotCurrentUser, IsNotAuthenticated
-from .serializers import UserSerializer, NewUserSerializer, CredentialsSerializer
+from .serializers import (
+    UserSerializer,
+    NewUserSerializer,
+    CredentialsSerializer,
+    LoginSerializer,
+)
 
 
 user_model = get_user_model()
+
+
+class LoginResponse(Response):
+    def __init__(self, user):
+        serializer = LoginSerializer(user)
+        super(LoginResponse, self).__init__(serializer.data)
 
 
 class UserViewMixin(object):
@@ -39,7 +50,7 @@ class SignUpView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         login(request, user)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return LoginResponse(user)
 
 
 class LoginView(generics.GenericAPIView):
@@ -47,7 +58,7 @@ class LoginView(generics.GenericAPIView):
 
     def get(self, request):
         if request.user.is_authenticated:
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return LoginResponse(request.user)
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
@@ -57,7 +68,7 @@ class LoginView(generics.GenericAPIView):
         user = authenticate(**serializer.validated_data)
         if user:
             login(request, user)
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return LoginResponse(user)
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
@@ -67,4 +78,4 @@ class LogoutView(APIView):
 
     def post(self, request):
         logout(request)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(None)

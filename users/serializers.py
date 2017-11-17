@@ -34,3 +34,9 @@ class NewUserSerializer(UserSerializer):
 class CredentialsSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, write_only=True)
     password = serializers.CharField(max_length=128, write_only=True)
+
+
+class LoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = user_model
+        fields = ('id', 'username')
